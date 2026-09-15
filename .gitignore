@@ -1,0 +1,19 @@
+# Окружение
+.env
+.env.*
+!.env.example
+
+# Зависимости и артефакты сборки
+backend/vendor/
+frontend/node_modules/
+frontend/dist/
+parser/__pycache__/
+parser/**/__pycache__/
+parser/.pytest_cache/
+
+# Эталон подписи записывается парсером на первом успешном прогоне
+parser/fixtures/real_request.json
+
+# IDE и ОС
+.idea/
+.DS_Store

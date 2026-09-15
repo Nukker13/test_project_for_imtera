@@ -1,0 +1,360 @@
+:root {
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --border: #e2e5ea;
+  --text: #1c1f24;
+  --muted: #6b7280;
+  --accent: #2f6df6;
+  --danger: #c0392b;
+  --danger-bg: #fdecea;
+  --success: #1e7b45;
+  --success-bg: #e8f6ed;
+  --info-bg: #eef3fe;
+  --warn-bg: #fff4e0;
+  --warn: #9a6200;
+  --radius: 10px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 15px/1.55 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+}
+
+.app__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 24px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.app__brand {
+  font-weight: 600;
+}
+
+.app__user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--muted);
+}
+
+.app__main {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.card__title {
+  margin: 0 0 8px;
+  font-size: 18px;
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 14px;
+  margin: 4px 0;
+}
+
+/* Форма входа */
+.login {
+  display: flex;
+  justify-content: center;
+  padding-top: 8vh;
+}
+
+.login__form {
+  width: 100%;
+  max-width: 360px;
+}
+
+.login__title {
+  margin: 0 0 16px;
+  font-size: 22px;
+}
+
+.field {
+  display: block;
+  margin-bottom: 14px;
+}
+
+.field__label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.field__input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 15px;
+  background: #fff;
+  color: var(--text);
+}
+
+.field__input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+}
+
+.field__error {
+  display: block;
+  margin-top: 6px;
+  color: var(--danger);
+  font-size: 13px;
+}
+
+.btn {
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn--primary {
+  width: 100%;
+  background: var(--accent);
+  color: #fff;
+}
+
+.btn--ghost {
+  width: auto;
+  background: transparent;
+  border-color: var(--border);
+  color: var(--text);
+}
+
+/* Форма настроек */
+.settings-form {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.settings-form .field__input {
+  flex: 1;
+}
+
+.settings-form .btn--primary {
+  width: auto;
+  white-space: nowrap;
+}
+
+/* Состояния загрузки и ошибок */
+.alert {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.alert--info {
+  background: var(--info-bg);
+  color: var(--accent);
+}
+
+.alert--error {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.alert--success {
+  background: var(--success-bg);
+  color: var(--success);
+}
+
+.alert__code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  background: rgba(0, 0, 0, 0.06);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.badge {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+
+.badge--warn {
+  background: var(--warn-bg);
+  color: var(--warn);
+}
+
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation: none;
+  }
+}
+
+/* Список организаций */
+.org-list {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.org-list__item {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  font-size: 15px;
+  color: var(--text);
+}
+
+.org-list__item--active {
+  border-color: var(--accent);
+  background: var(--info-bg);
+}
+
+.org-list__name {
+  font-weight: 500;
+}
+
+/* Витрина организации */
+.org-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 12px;
+  margin: 16px 0 8px;
+}
+
+.stats__item {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.stats__label {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.stats__value {
+  margin: 4px 0 0;
+  font-size: 22px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.stats__value--accent {
+  color: var(--accent);
+}
+
+/* Отзывы */
+.reviews-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.reviews {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+}
+
+.review {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.review:last-child {
+  border-bottom: none;
+}
+
+.review__head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.review__author {
+  font-weight: 600;
+}
+
+.review__rating {
+  color: #f0a500;
+  letter-spacing: 1px;
+}
+
+.review__rating-dim {
+  color: var(--border);
+}
+
+.review__text {
+  margin: 6px 0 0;
+  white-space: pre-line;
+}
+
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 16px;
+}

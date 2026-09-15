@@ -1,0 +1,6 @@
+fastapi>=0.115
+uvicorn[standard]>=0.32
+patchright>=1.49
+curl_cffi>=0.7
+pydantic>=2.9
+pytest>=8.0
