@@ -1,0 +1,135 @@
+# Продакшен-конфигурация. Отличия от локальной:
+#   * Caddy держит TLS, отдаёт собранную статику и проксирует API в php-fpm;
+#   * фронтенд собирается один раз в статику вместо dev-сервера Vite;
+#   * backend работает на php-fpm, а не на однопоточном `php -S`;
+#   * наружу открыты только 80 и 443 — БД, Redis и парсер из интернета не видны.
+#
+# Запуск:  docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_DATABASE}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  python-service:
+    build: ./parser
+    environment:
+      YANDEX_MAX_PAGES: ${YANDEX_MAX_PAGES:-12}
+      YANDEX_PAGE_SIZE: ${YANDEX_PAGE_SIZE:-50}
+      PARSER_DELAY_MIN_MS: ${PARSER_DELAY_MIN_MS:-400}
+      PARSER_DELAY_MAX_MS: ${PARSER_DELAY_MAX_MS:-1200}
+      LOG_LEVEL: ${PARSER_LOG_LEVEL:-INFO}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8001/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  app: &backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    environment: &backend-env
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_KEY: ${APP_KEY}
+      APP_URL: https://${SITE_ADDRESS}
+      DB_CONNECTION: pgsql
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      REDIS_HOST: redis
+      REDIS_CLIENT: predis
+      QUEUE_CONNECTION: redis
+      CACHE_STORE: redis
+      SESSION_DRIVER: database
+      SESSION_SECURE_COOKIE: "true"
+      SESSION_DOMAIN: ${SITE_ADDRESS}
+      SANCTUM_STATEFUL_DOMAINS: ${SITE_ADDRESS}
+      SEED_USER_EMAIL: ${SEED_USER_EMAIL}
+      SEED_USER_PASSWORD: ${SEED_USER_PASSWORD}
+      PARSER_URL: http://python-service:8001
+      PARSER_TIMEOUT: ${PARSER_TIMEOUT:-600}
+      # Схему создаёт только веб-контейнер — воркер не должен мигрировать параллельно.
+      RUN_MIGRATIONS: "true"
+    volumes:
+      - backend-storage:/var/www/html/storage
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  queue-worker:
+    <<: *backend
+    environment:
+      <<: *backend-env
+      RUN_MIGRATIONS: "false"
+    command: php artisan queue:work --tries=1 --timeout=900
+    depends_on:
+      app:
+        condition: service_started
+      python-service:
+        condition: service_started
+
+  # Одноразовая сборка фронтенда: отрабатывает и завершается, результат остаётся
+  # в томе, откуда его раздаёт Caddy.
+  frontend-build:
+    image: node:20-alpine
+    working_dir: /app
+    command: sh -c "npm install && npm run build && cp -r dist/. /out/"
+    volumes:
+      - ./frontend:/app
+      - frontend-dist:/out
+
+  caddy:
+    image: caddy:2-alpine
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      # public нужен Caddy, чтобы отдавать статику Laravel и находить index.php
+      # для php_fastcgi; сам PHP исполняется в контейнере app.
+      - ./backend:/var/www/html:ro
+      - frontend-dist:/srv/frontend:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    restart: unless-stopped
+    depends_on:
+      - app
+      - frontend-build
+
+volumes:
+  db-data:
+  backend-storage:
+  frontend-dist:
+  caddy-data:
+  caddy-config:

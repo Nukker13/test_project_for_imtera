@@ -1,0 +1,34 @@
+# Caddy получает и продлевает сертификат Let's Encrypt сам — отдельной настройки
+# TLS здесь нет намеренно. SITE_ADDRESS задаётся в .env.prod: это может быть свой
+# домен либо адрес вида 1-2-3-4.sslip.io, который резолвится в тот же IP и годится
+# для выпуска настоящего сертификата.
+{$SITE_ADDRESS} {
+	encode zstd gzip
+
+	# API и Sanctum уходят в php-fpm. Всё остальное — статика собранного фронтенда,
+	# поэтому маршруты перечислены явно, а не отданы под общий reverse_proxy.
+	@backend path /api/* /sanctum/* /up
+	handle @backend {
+		root * /var/www/html/public
+		php_fastcgi app:9000
+	}
+
+	handle {
+		root * /srv/frontend
+		# SPA: любой неизвестный путь отдаём index.html, маршрутизацию разбирает
+		# vue-router уже в браузере.
+		try_files {path} /index.html
+		file_server
+	}
+
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Referrer-Policy strict-origin-when-cross-origin
+	}
+
+	log {
+		output stdout
+		format console
+	}
+}

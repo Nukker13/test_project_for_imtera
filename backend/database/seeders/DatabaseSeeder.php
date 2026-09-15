@@ -17,11 +17,13 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        $user = config('seed.user');
+
         User::updateOrCreate(
-            ['email' => env('SEED_USER_EMAIL', 'admin@imtera.test')],
+            ['email' => $user['email']],
             [
-                'name' => 'Imtera Admin',
-                'password' => Hash::make(env('SEED_USER_PASSWORD', 'password')),
+                'name' => $user['name'],
+                'password' => Hash::make($user['password']),
                 'email_verified_at' => now(),
             ],
         );
