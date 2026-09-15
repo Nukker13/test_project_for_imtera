@@ -26,3 +26,6 @@ parser/fixtures/real_request.json
 # IDE и ОС
 .idea/
 .DS_Store
+
+# ТЗ не публикуем — файл остаётся локально
+spec.md
