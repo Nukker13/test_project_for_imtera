@@ -243,10 +243,18 @@ last_parsed_at                 │                                  pages_fetche
 
 ---
 
+## Как делался проект
+
+Проект написан в Claude Code. Требования и решения, принятые до старта, лежат в [docs/requirements.md](docs/requirements.md); что делал я, что делал агент и как проверялся результат, описано в [docs/ai-workflow.md](docs/ai-workflow.md). Рабочий контекст для агента — [AGENTS.md](AGENTS.md); `CLAUDE.md` просто подключает его.
+
+---
+
 ## Структура проекта
 
 ```
 .
+├── AGENTS.md                 контекст для ИИ-агентов (CLAUDE.md подключает его)
+├── docs/                     требования и описание работы с агентом
 ├── docker-compose.yml
 ├── backend/                  Laravel
 │   ├── app/Jobs/ParseOrganizationJob.php        прогон в очереди
